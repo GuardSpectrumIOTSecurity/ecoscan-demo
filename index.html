@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EcoScan – AI-Powered Climate Impact Tracker</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f0f7f0;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #006600;
+      text-align: center;
+    }
+    .logo {
+      font-size: 2.5em;
+      text-align: center;
+      margin: 20px 0;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #006600;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #004000;
+    }
+    .result {
+      margin-top: 20px;
+      background: white;
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .swap {
+      padding: 12px;
+      border-bottom: 1px dashed #eee;
+    }
+    .swap:last-child {
+      border-bottom: none;
+    }
+    .swap a {
+      color: #006600;
+      text-decoration: underline;
+    }
+    .total {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #006600;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">🌱</div>
+  <h1>EcoScan</h1>
+  <p>Scan your receipt and see the carbon impact of your purchases.</p>
+
+  <textarea id="receiptText" placeholder="Paste your receipt text here...
+1 lb Beef
+1 Gallon Milk
+Plastic Water Bottles"></textarea>
+
+  <button onclick="scanReceipt()">📷 Scan Receipt</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function scanReceipt() {
+      const text = document.getElementById('receiptText').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!text.trim()) {
+        resultDiv.innerHTML = '<p>Please enter some text.</p>';
+        return;
+      }
+
+      resultDiv.innerHTML = '<p>Scanning...</p>';
+
+      try {
+        const res = await fetch('http://127.0.0.1:3001/scan/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+
+        let swapsHtml = '';
+        data.swaps.forEach(swap => {
+          swapsHtml += `
+            <div class="swap">
+              <strong>${swap.item}</strong> → 
+              <a href="${swap.affiliateLink}" target="_blank">${swap.alternative}</a>
+              <br>
+              <span style="color:#006600">Save: ${swap.co2Saved}g CO₂</span>
+              <br>
+              <small>Buy on ${swap.store}</small>
+            </div>
+          `;
+        });
+
+        resultDiv.innerHTML = `
+          <div class="result">
+            <p><strong>Receipt Processed!</strong></p>
+            <div class="total">Total CO₂: ${data.totalCarbon}g</div>
+            ${swapsHtml}
+          </div>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `
+          <div class="result" style="background:#ffe6e6">
+            <p><strong>Error:</strong> Could not reach the server.</p>
+            <p>Make sure your backend is running on port 3001.</p>
+          </div>
+        `;
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
