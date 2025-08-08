@@ -69,6 +69,12 @@
       color: #006600;
       margin: 10px 0;
     }
+    .context {
+      font-size: 0.9em;
+      color: #555;
+      font-style: italic;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -79,9 +85,11 @@
   <textarea id="receiptText" placeholder="Paste your receipt text here...
 1 lb Beef
 1 Gallon Milk
-Plastic Water Bottles"></textarea>
+Cheddar Cheese
+Dozen Eggs
+Vanilla Ice Cream"></textarea>
 
-  <button onclick="scanReceipt()">📷 Scan Receipt</button>
+  <button onclick="scanReceipt()">🌱 Show My Impact</button>
 
   <div id="result"></div>
 
@@ -122,8 +130,9 @@ Plastic Water Bottles"></textarea>
 
         resultDiv.innerHTML = `
           <div class="result">
-            <p><strong>Receipt Processed!</strong></p>
+            <p><strong>Here’s your climate impact:</strong></p>
             <div class="total">Total CO₂: ${data.totalCarbon}g</div>
+            <p class="context">That’s like driving ${(data.totalCarbon / 400).toFixed(1)} miles in a gas car.</p>
             ${swapsHtml}
           </div>
         `;
